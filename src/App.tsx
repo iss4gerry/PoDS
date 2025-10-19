@@ -5,24 +5,13 @@ import ActivityBubble from './components/activity-bubble';
 import CreateActivity from './components/create-activity';
 import MobileWarning from './components/mobile-warning';
 import Web3 from 'web3';
-import { abi } from './abi/pods-abi';
+import abi from './abi/pods-abi.json';
 import WalletButton from './components/connect-wallet';
+import NoWallet from './components/no-wallet';
+import toast, { Toaster } from 'react-hot-toast';
 
 export default function ActivityTracker() {
-	const [activities, setActivities] = useState<Activity[]>([
-		{ id: 1, name: 'Makan Nasi Goreng', owner: 'Budi', participantCount: 15 },
-		{
-			id: 2,
-			name: 'Main Game Mobile Legends',
-			owner: 'Siti',
-			participantCount: 23,
-		},
-		{ id: 3, name: 'Ngopi di Kafe', owner: 'Andi', participantCount: 8 },
-		{ id: 4, name: 'Jogging Pagi', owner: 'Rina', participantCount: 12 },
-		{ id: 5, name: 'Nonton Film Horror', owner: 'Dedi', participantCount: 31 },
-		{ id: 6, name: 'Belajar Programming', owner: 'Yanto', participantCount: 5 },
-	]);
-
+	const [activities, setActivities] = useState<Activity[]>([]);
 	const [newActivity, setNewActivity] = useState<string>('');
 	const [newOwner, setNewOwner] = useState<string>('');
 	const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -31,8 +20,7 @@ export default function ActivityTracker() {
 	const [account, setAccount] = useState<string | null>();
 	const [contract, setContract] = useState<any>(null);
 
-	const [name, setName] = useState<string>();
-	const contractAddress = '0x7E1B03Cf2d1Bce732450B73cF5053ee9Df348e8F';
+	const contractAddress = '0x9FaA2517726Ff524c9C7C4D1FFd133B22F198884';
 
 	useEffect(() => {
 		const checkDevice = () => {
@@ -66,6 +54,18 @@ export default function ActivityTracker() {
 	}, [activities]);
 
 	const addActivity = (): void => {
+		const addActivityFn = async () => {
+			await contract.methods
+				.addActivity(newActivity.trim())
+				.send({ from: account });
+		};
+
+		toast.promise(addActivityFn(), {
+			loading: 'Submitting transaction to the blockchain...',
+			success: 'Activity successfully added and confirmed on-chain',
+			error: 'Transaction failed or was rejected',
+		});
+
 		if (newActivity.trim() && newOwner.trim()) {
 			setActivities([
 				...activities,
@@ -79,6 +79,7 @@ export default function ActivityTracker() {
 			setNewActivity('');
 			setNewOwner('');
 		}
+		fetchActivities();
 	};
 
 	const setOnClose = () => {
@@ -141,6 +142,30 @@ export default function ActivityTracker() {
 		setContract(contractInstance);
 	};
 
+	useEffect(() => {
+		if (account && contract) {
+			fetchActivities();
+		}
+	}, [account, contract]);
+
+	const fetchActivities = async () => {
+		try {
+			const activities = await contract.methods.getAllActivities().call();
+
+			const formattedActivities = activities.map(
+				(activity: any, index: number) => ({
+					id: index,
+					name: web3!.utils.hexToUtf8(activity.name),
+					owner: activity.owner,
+					participantCount: Number(activity.participantsCount),
+					participants: activity.participants,
+				})
+			);
+
+			setActivities(formattedActivities);
+		} catch (error) {}
+	};
+
 	const disconnectWallet = () => {
 		setAccount(null);
 	};
@@ -156,47 +181,53 @@ export default function ActivityTracker() {
 	}
 
 	return (
-		<div
-			className="min-h-screen bg-gray-200 flex flex-col"
-			style={{
-				backgroundImage: `repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,.05) 2px, rgba(0,0,0,.05) 4px),
+		<>
+			<Toaster position="top-right" reverseOrder={true} />
+			<div
+				className="min-h-screen bg-gray-200 flex flex-col"
+				style={{
+					backgroundImage: `repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,.05) 2px, rgba(0,0,0,.05) 4px),
                            repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0,0,0,.05) 2px, rgba(0,0,0,.05) 4px)`,
-			}}
-		>
-			<WalletButton
-				account={account}
-				connectWallet={connectWallet}
-				disconnectWallet={disconnectWallet}
-			/>
-			<CreateActivity
-				isOpen={isOpen}
-				onClose={setOnClose}
-				newActivity={newActivity}
-				setNewActivity={setNewActivity}
-				newOwner={newOwner}
-				setNewOwner={setNewOwner}
-				addActivity={addActivity}
-				handleKeyPress={handleKeyPress}
-			/>
-			<ActivityBubble
-				activities={activities}
-				positions={positions}
-				incrementActivity={incrementActivity}
-			/>
-
-			<button
-				onClick={() => setIsOpen(true)}
-				className="fixed bottom-8 right-8 bg-black border-4 border-white w-16 h-16 flex items-center justify-center hover:bg-white hover:border-black group transition-all duration-200 z-50 hover:cursor-pointer"
-				style={{ boxShadow: '6px 6px 0px rgba(0,0,0,0.8)' }}
+				}}
 			>
-				<Plus
-					size={32}
-					className="text-white group-hover:text-black font-bold"
-					strokeWidth={4}
+				<WalletButton
+					account={account}
+					connectWallet={connectWallet}
+					disconnectWallet={disconnectWallet}
 				/>
-			</button>
+				<CreateActivity
+					isOpen={isOpen}
+					onClose={setOnClose}
+					newActivity={newActivity}
+					setNewActivity={setNewActivity}
+					newOwner={newOwner}
+					setNewOwner={setNewOwner}
+					addActivity={addActivity}
+					handleKeyPress={handleKeyPress}
+				/>
+				{account ? (
+					<ActivityBubble
+						activities={activities}
+						positions={positions}
+						incrementActivity={incrementActivity}
+					/>
+				) : (
+					<NoWallet />
+				)}
 
-			<style>{`
+				<button
+					onClick={() => setIsOpen(true)}
+					className="fixed bottom-8 right-8 bg-black border-4 border-white w-16 h-16 flex items-center justify-center hover:bg-white hover:border-black group transition-all duration-200 z-50 hover:cursor-pointer"
+					style={{ boxShadow: '6px 6px 0px rgba(0,0,0,0.8)' }}
+				>
+					<Plus
+						size={32}
+						className="text-white group-hover:text-black font-bold"
+						strokeWidth={4}
+					/>
+				</button>
+
+				<style>{`
         @keyframes float-0 {
           0%, 100% { transform: translate(-50%, -50%) translateY(0px); }
           50% { transform: translate(-50%, -50%) translateY(-10px); }
@@ -212,6 +243,7 @@ export default function ActivityTracker() {
           66% { transform: translate(-50%, -50%) translateX(10px); }
         }
       `}</style>
-		</div>
+			</div>
+		</>
 	);
 }

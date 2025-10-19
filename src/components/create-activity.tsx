@@ -70,24 +70,6 @@ export default function CreateActivity({
 									/>
 								</div>
 
-								<div>
-									<label
-										className="block text-black font-bold mb-2 uppercase text-sm"
-										style={{ fontFamily: 'monospace' }}
-									>
-										Owner
-									</label>
-									<input
-										type="text"
-										value={newOwner}
-										onChange={(e) => setNewOwner(e.target.value)}
-										onKeyDown={handleKeyPress}
-										placeholder="e.g., Budi"
-										className="w-full px-4 py-3 bg-gray-100 border-4 border-black text-black font-bold focus:outline-none focus:bg-white text-base"
-										style={{ fontFamily: 'monospace' }}
-									/>
-								</div>
-
 								<button
 									onClick={addActivity}
 									className="w-full bg-black hover:bg-white text-white hover:text-black border-4 border-black px-6 py-4 font-bold transition-all duration-200 uppercase text-lg mt-6 cursor-pointer"
