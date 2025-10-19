@@ -1,5 +1,3 @@
-import React from 'react';
-
 interface WalletButtonProps {
 	account: string | null | undefined;
 	connectWallet: () => void;

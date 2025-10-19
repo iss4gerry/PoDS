@@ -195,8 +195,6 @@ export default function ActivityTracker() {
 					onClose={setOnClose}
 					newActivity={newActivity}
 					setNewActivity={setNewActivity}
-					newOwner={newOwner}
-					setNewOwner={setNewOwner}
 					addActivity={addActivity}
 					handleKeyPress={handleKeyPress}
 				/>

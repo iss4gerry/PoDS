@@ -4,8 +4,6 @@ export default function CreateActivity({
 	newActivity,
 	setNewActivity,
 	handleKeyPress,
-	setNewOwner,
-	newOwner,
 	addActivity,
 }: {
 	isOpen: boolean;
@@ -13,8 +11,6 @@ export default function CreateActivity({
 	newActivity: string;
 	setNewActivity: React.Dispatch<React.SetStateAction<string>>;
 	handleKeyPress: (e: React.KeyboardEvent<HTMLInputElement>) => void;
-	setNewOwner: React.Dispatch<React.SetStateAction<string>>;
-	newOwner: string;
 	addActivity: () => void;
 }) {
 	return (
