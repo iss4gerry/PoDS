@@ -80,20 +80,15 @@ export default function ActivityTracker() {
 			setNewOwner('');
 		}
 		fetchActivities();
+		setOnClose();
 	};
 
 	const setOnClose = () => {
 		setIsOpen(false);
 	};
 
-	const incrementActivity = (id: number): void => {
-		setActivities(
-			activities.map((activity) =>
-				activity.id === id
-					? { ...activity, participantCount: activity.participantCount + 1 }
-					: activity
-			)
-		);
+	const incrementActivity = async (id: number): Promise<void> => {
+		await contract.methods.doingActivity(id).send({ from: account });
 	};
 
 	const connectWallet = async () => {

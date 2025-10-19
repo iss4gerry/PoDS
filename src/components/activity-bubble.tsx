@@ -9,6 +9,41 @@ export default function ActivityBubble({
 	positions: Record<number, Position>;
 	incrementActivity: (id: number) => void;
 }) {
+	if (!activities) {
+		return (
+			<div
+				className="flex items-center justify-center min-h-screen bg-white"
+				style={{
+					backgroundImage: `repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,.05) 2px, rgba(0,0,0,.05) 4px),
+                           repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0,0,0,.05) 2px, rgba(0,0,0,.05) 4px)`,
+				}}
+			>
+				<style>
+					{`
+			@keyframes float {
+				0% { transform: translateY(0); }
+				50% { transform: translateY(-8px); }
+				100% { transform: translateY(0); }
+			}
+		`}
+				</style>
+				<div
+					className="text-center"
+					style={{
+						animation: 'float 1.2s ease-in-out infinite',
+						fontFamily: 'monospace',
+					}}
+				>
+					<h1
+						className="text-4xl font-bold text-black"
+						style={{ fontFamily: 'monospace' }}
+					>
+						PLEASE WAIT
+					</h1>
+				</div>
+			</div>
+		);
+	}
 	return (
 		<div className="flex-1 relative overflow-hidden">
 			{activities.map((activity) => {
